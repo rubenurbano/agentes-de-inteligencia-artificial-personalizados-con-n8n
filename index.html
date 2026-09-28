@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentes de IA personalizados con n8n — Tutorial Profesional</title>
+<style>
+:root{
+  --bg:#0a0e1a;
+  --card:#0f172a;
+  --border:#1e3a5f;
+  --accent:#00d4ff;
+  --green:#22c55e;
+  --amber:#f59e0b;
+  --red:#ef4444;
+  --purple:#a855f7;
+  --text:#e2e8f0;
+  --muted:#94a3b8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+/* Progress bar */
+#progress{
+  position:fixed;top:0;left:0;height:3px;width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--purple),var(--green));
+  z-index:1000;transition:width .1s linear;
+}
+/* Navbar */
+#navbar{
+  position:fixed;top:3px;left:0;right:0;
+  background:rgba(10,14,26,.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  z-index:999;
+  padding:0;
+}
+.nav-inner{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 14px;
+  overflow-x:auto;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border) transparent;
+}
+.nav-inner::-webkit-scrollbar{height:4px}
+.nav-inner::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.nav-btn{
+  flex:0 0 auto;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:7px 13px;
+  border-radius:8px;
+  cursor:pointer;
+  font-family:inherit;
+  font-size:12.5px;
+  font-weight:600;
+  letter-spacing:.4px;
+  white-space:nowrap;
+  transition:all .2s;
+}
+.nav-btn:hover{color:var(--text);border-color:var(--accent)}
+.nav-btn.active{
+  background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(168,85,247,.18));
+  color:var(--accent);
+  border-color:var(--accent);
+  box-shadow:0 0 12px rgba(0,212,255,.35);
+}
+/* Sections */
+main{margin-top:60px;min-height:calc(100vh - 60px);padding:0 0 80px}
+.section{display:none;padding:20px 14px 40px;max-width:1100px;margin:0 auto;animation:fade .4s ease}
+.section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* Hero SVG */
+.hero-svg{
+  width:100%;
+  max-width:1100px;
+  margin:0 auto 22px;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:#070b14;
+  box-shadow:0 0 40px rgba(0,212,255,.15),0 10px 30px rgba(0,0,0,.6);
+  display:block;
+}
+.hero-svg svg{display:block;width:100%;height:auto}
+/* HOME hero */
+.hero-badge{
+  display:inline-block;
+  background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(168,85,247,.15));
+  border:1px solid var(--accent);
+  color:var(--accent);
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:1.5px;
+  margin-bottom:14px;
+}
+h1.hero-title{
+  font-size:clamp(1.7rem,5vw,2.8rem);
+  font-weight:800;
+  line-height:1.15;
+  letter-spacing:-.5px;
+  margin-bottom:12px;
+  background:linear-gradient(135deg,#00d4ff 0%,#a855f7 50%,#22c55e 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.hero-sub{
+  color:var(--muted);
+  font-size:clamp(.95rem,2.4vw,1.15rem);
+  margin-bottom:18px;
+  font-weight:500;
+}
+.hero-desc{
+  color:var(--text);
+  font-size:.98rem;
+  margin-bottom:22px;
+  max-width:900px;
+}
+.hero-quote{
+  border-left:3px solid var(--accent);
+  background:linear-gradient(90deg,rgba(0,212,255,.08),transparent);
+  padding:14px 18px;
+  border-radius:0 10px 10px 0;
+  font-style:italic;
+  color:var(--accent);
+  font-size:.95rem;
+  margin-bottom:22px;
+}
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  margin-bottom:22px;
+}
+.metric{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px 14px;
+  text-align:center;
+  transition:transform .2s,border-color .2s;
+}
+.metric:hover{transform:translateY(-3px);border-color:var(--accent)}
+.metric .num{
+  font-size:1.6rem;
+  font-weight:800;
+  color:var(--accent);
+  letter-spacing:-.5px;
+  display:block;
+  margin-bottom:4px;
+}
+.metric .lbl{
+  font-size:.75rem;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-weight:600;
+}
+.datetime-row{
+  display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;
+}
+.chip{
+  background:var(--card);
+  border:1px solid var(--border);
+  color:var(--muted);
+  padding:7px 13px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.5px;
+}
+.chip strong{color:var(--accent)}
+/* Chapter styling */
+.chapter-head{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  margin-bottom:22px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
+.chapter-icon{
+  flex:0 0 auto;
+  width:44px;height:44px;
+  border-radius:10px;
+  background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(168,85,247,.15));
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);
+  font-size:1.3rem;
+  font-weight:800;
+}
+.chapter-head h2{
+  font-size:clamp(1.25rem,3.6vw,1.75rem);
+  font-weight:800;
+  letter-spacing:-.3px;
+  color:#fff;
+  line-height:1.2;
+}
+.chapter-head .kicker{
+  font-size:11px;letter-spacing:1.5px;font-weight:700;
+  color:var(--accent);text-transform:uppercase;display:block;margin-bottom:2px;
+}
+h3{
+  font-size:1.15rem;
+  font-weight:700;
+  color:var(--accent);
+  margin:22px 0 10px;
+  letter-spacing:-.2px;
+}
+h4{font-size:1rem;font-weight:700;color:var(--text);margin:16px 0 8px}
+p{margin-bottom:12px;color:var(--text)}
+strong{color:#fff;font-weight:700}
+em{color:var(--muted)}
+ul,ol{margin:10px 0 14px 22px;color:var(--text)}
+li{margin-bottom:6px}
+/* Cards */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:14px;
+}
+.card-title{
+  display:flex;align-items:center;gap:10px;
+  font-weight:700;color:#fff;font-size:1rem;margin-bottom:8px;
+}
+.dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.dot.green{background:var(--green);box-shadow:0 0 8px var(--green)}
+.dot.amber{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.dot.red{background:var(--red);box-shadow:0 0 8px var(--red)}
+.dot.cyan{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.dot.purple{background:var(--purple);box-shadow:0 0 8px var(--purple)}
+/* Grid */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+/* Callouts */
+.callout{
+  border-radius:10px;
+  padding:14px 16px;
+  margin:14px 0;
+  border-left:4px solid;
+  background:var(--card);
+  font-size:.93rem;
+}
+.callout .label{
+  display:block;font-weight:800;font-size:.75rem;
+  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;
+}
+.callout.info{border-color:var(--accent)}
+.callout.info .label{color:var(--accent)}
+.callout.ex{border-color:var(--green)}
+.callout.ex .label{color:var(--green)}
+.callout.warn{border-color:var(--amber)}
+.callout.warn .label{color:var(--amber)}
+.callout.err{border-color:var(--red)}
+.callout.err .label{color:var(--red)}
+/* Table */
+.table-wrap{overflow-x:auto;margin:14px 0;border-radius:10px;border:1px solid var(--border);background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:520px}
+th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{
+  background:rgba(0,212,255,.08);
+  color:var(--accent);
+  font-weight:700;
+  font-size:.78rem;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,212,255,.03)}
+/* Steps */
+.steps{counter-reset:step;margin:14px 0}
+.step{
+  position:relative;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px 16px 16px 62px;
+  margin-bottom:12px;
+}
+.step::before{
+  counter-increment:step;
+  content:counter(step);
+  position:absolute;left:16px;top:16px;
+  width:34px;height:34px;
+  border-radius:9px;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  color:#070b14;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:1rem;
+}
+.step-title{font-weight:700;color:#fff;margin-bottom:6px;font-size:.98rem}
+/* Flow diagram (CSS) */
+.flow{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:16px;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;margin:14px 0;justify-content:center;
+}
+.flow-node{
+  padding:9px 13px;border-radius:9px;
+  font-size:12.5px;font-weight:700;letter-spacing:.4px;
+  border:1px solid;white-space:nowrap;
+}
+.fn-cyan{color:var(--accent);border-color:var(--accent);background:rgba(0,212,255,.08)}
+.fn-green{color:var(--green);border-color:var(--green);background:rgba(34,197,94,.08)}
+.fn-amber{color:var(--amber);border-color:var(--amber);background:rgba(245,158,11,.08)}
+.fn-purple{color:var(--purple);border-color:var(--purple);background:rgba(168,85,247,.08)}
+.fn-red{color:var(--red);border-color:var(--red);background:rgba(239,68,68,.08)}
+.flow-arrow{color:var(--muted);font-weight:700;font-size:14px}
+/* Checklist */
+.checklist{list-style:none;margin-left:0}
+.checklist li{
+  padding-left:30px;position:relative;margin-bottom:8px;
+  font-size:.93rem;color:var(--text);
+}
+.checklist li::before{
+  content:"";position:absolute;left:0;top:6px;
+  width:16px;height:16px;border:1.5px solid var(--accent);border-radius:4px;
+  background:rgba(0,212,255,.05);
+}
+/* Code block */
+pre.code{
+  background:#070b14;border:1px solid var(--border);
+  border-radius:10px;padding:14px;overflow-x:auto;
+  font-family:'Consolas','Monaco',monospace;
+  font-size:.82rem;line-height:1.55;color:#b8d4e8;
+  margin:12px 0;white-space:pre-wrap;word-break:break-word;
+}
+/* Accordion */
+.acc{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;margin-bottom:10px;overflow:hidden;
+}
+.acc-head{
+  padding:14px 16px;cursor:pointer;
+  font-weight:700;font-size:.95rem;color:#fff;
+  display:flex;justify-content:space-between;align-items:center;
+  user-select:none;transition:background .2s;
+}
+.acc-head:hover{background:rgba(0,212,255,.05)}
+.acc-head::after{content:"▾";color:var(--accent);font-size:1rem;transition:transform .3s}
+.acc.open .acc-head::after{transform:rotate(180deg)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.acc.open .acc-body{max-height:2500px}
+.acc-inner{padding:4px 16px 16px;color:var(--text);font-size:.93rem}
+/* Exercise */
+.exercise{
+  background:linear-gradient(135deg,rgba(34,197,94,.05),rgba(0,212,255,.05));
+  border:1px solid var(--border);border-radius:12px;
+  padding:16px;margin-bottom:14px;
+}
+.exercise h4{color:var(--green);margin-top:0}
+.solution{
+  margin-top:10px;padding:12px 14px;
+  background:rgba(0,212,255,.06);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;font-size:.9rem;
+}
+.solution strong{color:var(--accent)}
+/* FAQ */
+.faq-item{margin-bottom:12px}
+/* Exercise enhancement */
+.ex-head{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.ex-head h4{margin:0;color:var(--green);font-size:1.02rem}
+.dif-badge{
+  display:inline-block;
+  padding:3px 10px;
+  border-radius:999px;
+  font-size:10.5px;
+  font-weight:800;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.dif-basica{background:rgba(34,197,94,.12);color:var(--green);border:1px solid var(--green)}
+.dif-intermedia{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid var(--amber)}
+.dif-avanzada{background:rgba(239,68,68,.12);color:var(--red);border:1px solid var(--red)}
+.ex-meta{font-size:.82rem;color:var(--muted);margin-bottom:10px;letter-spacing:.3px}
+.ex-meta strong{color:var(--accent)}
+.opt-list{list-style:none;margin-left:0;padding-left:0}
+.opt-list li{
+  padding:8px 12px;margin-bottom:6px;
+  background:rgba(0,212,255,.04);
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:.9rem;
+}
+.opt-list li strong{color:var(--accent)}
+.pair-box{
+  background:rgba(0,212,255,.04);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:10px;
+  font-size:.9rem;
+}
+.pair-box .pair-title{
+  display:block;font-weight:800;color:var(--accent);
+  font-size:.78rem;letter-spacing:1.2px;text-transform:uppercase;
+  margin-bottom:8px;
+}
+.pair-box ol,.pair-box ul{margin:0 0 0 20px}
+.pair-box li{margin-bottom:4px}
+/* Back to top */
+#top-btn{
+  position:fixed;bottom:20px;right:20px;
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  color:#070b14;border:none;cursor:pointer;
+  font-size:1.3rem;font-weight:800;
+  display:none;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(0,212,255,.4);
+  z-index:998;transition:transform .2s;
+}
+#top-btn:hover{transform:scale(1.1)}
+/* Credits */
+.credits-wrap{
+  text-align:center;padding:10px 0 40px;
+}
+.credits-wrap .credit-name{
+  font-size:1.6rem;font-weight:800;color:var(--accent);
+  margin:16px 0 6px;letter-spacing:-.3px;
+}
+.credits-wrap .credit-title{
+  font-size:1.05rem;color:var(--text);font-weight:600;margin-bottom:14px;
+}
+.credits-wrap .credit-line{
+  color:var(--muted);font-size:.9rem;margin:6px 0;
+}
+.credits-wrap .motto{
+  margin-top:20px;font-style:italic;color:var(--purple);
+  font-size:1rem;letter-spacing:.5px;
+}
+/* Footer */
+footer{
+  text-align:center;padding:30px 14px;color:var(--muted);
+  font-size:.82rem;border-top:1px solid var(--border);
+  margin-top:30px;
+}
+footer p{margin:4px 0;color:var(--muted)}
+footer .motto-footer{
+  font-style:italic;color:var(--purple);margin-top:10px;
+}
+/* responsive */
+@media (max-width:560px){
+  main{margin-top:56px}
+  .section{padding:14px 12px 30px}
+  h3{font-size:1.05rem}
+  .chapter-icon{width:38px;height:38px;font-size:1.1rem}
+  .step{padding-left:56px}
+  .step::before{width:30px;height:30px;font-size:.9rem}
+  .nav-btn{padding:6px 11px;font-size:12px}
+  .metric .num{font-size:1.35rem}
+  .ex-head h4{font-size:.95rem}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <button class="nav-btn active" data-target="home">🏠 Inicio</button>
+    <button class="nav-btn" data-target="cap1">Cap. 1 · Fundamentos</button>
+    <button class="nav-btn" data-target="cap2">Cap. 2 · Anatomía</button>
+    <button class="nav-btn" data-target="cap3">Cap. 3 · Marco 7 Pasos</button>
+    <button class="nav-btn" data-target="cap4">Cap. 4 · n8n y MCP</button>
+    <button class="nav-btn" data-target="cap5">Cap. 5 · Caso Práctico</button>
+    <button class="nav-btn" data-target="cap6">Cap. 6 · Conclusiones</button>
+    <button class="nav-btn" data-target="ejercicios">📝 Ejercicios</button>
+    <button class="nav-btn" data-target="fuentes">📚 Fuentes</button>
+    <button class="nav-btn" data-target="creditos">👤 Créditos</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ HOME ============ -->
+<section id="home" class="section active">
+
+  <div class="hero-svg" id="hero-svg-container">
+    <svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" id="main-svg">
+      <defs>
+        <radialGradient id="bgG" cx="50%" cy="50%" r="80%">
+          <stop offset="0%" stop-color="#0d1a2e">
+            <animate attributeName="stop-color" values="#0d1a2e;#12243d;#0a1424;#0d1a2e" dur="8s" repeatCount="indefinite"/>
+          </stop>
+          <stop offset="100%" stop-color="#070b14">
+            <animate attributeName="stop-color" values="#070b14;#050810;#0a0e1a;#070b14" dur="8s" repeatCount="indefinite"/>
+          </stop>
+        </radialGradient>
+        <pattern id="grid" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+          <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e3a5f" stroke-width="0.4"/>
+        </pattern>
+        <pattern id="dots" x="0" y="0" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="11" cy="11" r="0.9" fill="#00d4ff" opacity="0.18"/>
+        </pattern>
+        <filter id="g1" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="g2" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <linearGradient id="pathG" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#22c55e"/>
+          <stop offset="50%" stop-color="#00d4ff"/>
+          <stop offset="100%" stop-color="#ef4444"/>
+        </linearGradient>
+        <path id="mpMain" d="M 90 225 C 200 225, 240 225, 350 225 C 500 225, 560 225, 720 225" fill="none"/>
+        <path id="mpTools" d="M 350 225 C 420 225, 470 200, 510 150 C 530 125, 540 100, 550 90" fill="none"/>
+        <path id="mpMem" d="M 350 225 C 420 225, 470 250, 510 300 C 530 325, 540 350, 550 360" fill="none"/>
+        <path id="mpGhost" d="M 90 225 C 200 200, 260 180, 350 225 C 440 270, 500 250, 550 90" fill="none"/>
+      </defs>
+
+      <rect width="800" height="450" fill="url(#bgG)"/>
+      <rect width="800" height="450" fill="url(#grid)">
+        <animate attributeName="opacity" values="0.25;0.6;0.25" dur="5s" repeatCount="indefinite"/>
+      </rect>
+      <rect width="800" height="450" fill="url(#dots)">
+        <animate attributeName="opacity" values="0.4;1;0.4" dur="4s" repeatCount="indefinite"/>
+      </rect>
+
+      <!-- Orbit rings -->
+      <g transform="translate(400,225)">
+        <ellipse rx="300" ry="120" fill="none" stroke="#00d4ff" stroke-width="0.8" stroke-dasharray="4 8" opacity="0.35" filter="url(#g1)">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="24s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-dasharray" values="4 8;10 4;4 8" dur="6s" repeatCount="indefinite"/>
+        </ellipse>
+      </g>
+      <g transform="translate(400,225)">
+        <ellipse rx="240" ry="92" fill="none" stroke="#a855f7" stroke-width="0.7" stroke-dasharray="2 6" opacity="0.35">
+          <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="18s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-dasharray" values="2 6;8 3;2 6" dur="4s" repeatCount="indefinite"/>
+        </ellipse>
+      </g>
+      <g transform="translate(400,225)">
+        <ellipse rx="180" ry="70" fill="none" stroke="#22c55e" stroke-width="0.6" stroke-dasharray="3 5" opacity="0.3">
+          <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="30s" repeatCount="indefinite"/>
+        </ellipse>
+      </g>
+
+      <!-- Connection paths -->
+      <use href="#mpMain" stroke="#1e3a5f" stroke-width="2.2" fill="none"/>
+      <use href="#mpMain" stroke="url(#pathG)" stroke-width="1.6" fill="none" stroke-dasharray="6 10" opacity="0.95">
+        <animate attributeName="stroke-dashoffset" from="0" to="-32" dur="1.5s" repeatCount="indefinite"/>
+      </use>
+      <use href="#mpTools" stroke="#f59e0b" stroke-width="1.3" fill="none" stroke-dasharray="4 8" opacity="0.75">
+        <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="1.8s" repeatCount="indefinite"/>
+      </use>
+      <use href="#mpMem" stroke="#a855f7" stroke-width="1.3" fill="none" stroke-dasharray="4 8" opacity="0.75">
+        <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="1.8s" repeatCount="indefinite"/>
+      </use>
+
+      <!-- TRIGGER -->
+      <g>
+        <circle cx="90" cy="225" r="34" fill="none" stroke="#22c55e" stroke-width="0.8" opacity="0.6">
+          <animate attributeName="r" values="34;46;34" dur="2.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0;0.6" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="90" cy="225" r="34" fill="none" stroke="#22c55e" stroke-width="0.8" opacity="0.6">
+          <animate attributeName="r" values="34;46;34" dur="2.5s" begin="1.25s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0;0.6" dur="2.5s" begin="1.25s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="90" cy="225" r="26" fill="#0f172a" stroke="#22c55e" stroke-width="1.6" filter="url(#g1)"/>
+        <path d="M 84 218 L 92 218 L 88 228 L 96 228 L 84 240 L 88 230 L 82 230 Z" fill="#22c55e"/>
+        <text x="90" y="270" text-anchor="middle" fill="#22c55e" font-size="11" font-family="Segoe UI, sans-serif" font-weight="700" letter-spacing="1">TRIGGER</text>
+        <text x="90" y="283" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Segoe UI, sans-serif">
+          Formulario / Email
+          <animate attributeName="opacity" values="0.7;1;0.7" dur="3s" repeatCount="indefinite"/>
+        </text>
+      </g>
+
+      <!-- BRAIN -->
+      <g>
+        <circle cx="350" cy="225" r="55" fill="#00d4ff" opacity="0.06">
+          <animate attributeName="r" values="50;72;50" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="350" cy="225" r="45" fill="none" stroke="#00d4ff" stroke-width="1" opacity="0.45" stroke-dasharray="5 5">
+          <animateTransform attributeName="transform" type="rotate" from="0 350 225" to="360 350 225" dur="8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="350" cy="225" r="38" fill="none" stroke="#00d4ff" stroke-width="1.5" opacity="0.6">
+          <animate attributeName="r" values="38;50;38" dur="2.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0.1;0.6" dur="2.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="350" cy="225" r="32" fill="#0f172a" stroke="#00d4ff" stroke-width="2" filter="url(#g2)">
+          <animate attributeName="stroke-width" values="2;3.2;2" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <g stroke="#00d4ff" stroke-width="1.3" fill="none" opacity="0.95">
+          <line x1="350" y1="215" x2="340" y2="225"/>
+          <line x1="350" y1="215" x2="360" y2="225"/>
+          <line x1="340" y1="225" x2="350" y2="236"/>
+          <line x1="360" y1="225" x2="350" y2="236"/>
+          <circle cx="350" cy="215" r="3" fill="#00d4ff"/>
+          <circle cx="340" cy="225" r="3" fill="#00d4ff"/>
+          <circle cx="360" cy="225" r="3" fill="#00d4ff"/>
+          <circle cx="350" cy="236" r="3" fill="#00d4ff"/>
+        </g>
+        <text x="350" y="279" text-anchor="middle" fill="#00d4ff" font-size="12" font-family="Segoe UI, sans-serif" font-weight="800" letter-spacing="1.5">LLM · CEREBRO</text>
+        <text x="350" y="292" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Segoe UI, sans-serif">Claude / GPT / Gemini</text>
+      </g>
+
+      <!-- TOOLS -->
+      <g>
+        <circle cx="550" cy="90" r="30" fill="none" stroke="#f59e0b" stroke-width="0.8" opacity="0.5">
+          <animate attributeName="r" values="30;42;30" dur="3s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="550" cy="90" r="22" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5" filter="url(#g1)"/>
+        <g stroke="#f59e0b" stroke-width="1.8" fill="none" stroke-linecap="round">
+          <circle cx="544" cy="84" r="3"/>
+          <line x1="546.5" y1="86.5" x2="556" y2="96"/>
+        </g>
+        <text x="550" y="127" text-anchor="middle" fill="#f59e0b" font-size="10" font-family="Segoe UI, sans-serif" font-weight="700" letter-spacing="1">TOOLS</text>
+        <text x="550" y="138" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Segoe UI, sans-serif">Sheets · Gmail · CRM</text>
+      </g>
+
+      <!-- MEMORY -->
+      <g>
+        <circle cx="550" cy="360" r="30" fill="none" stroke="#a855f7" stroke-width="0.8" opacity="0.5">
+          <animate attributeName="r" values="30;42;30" dur="3.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0;0.5" dur="3.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="550" cy="360" r="22" fill="#0f172a" stroke="#a855f7" stroke-width="1.5" filter="url(#g1)"/>
+        <g stroke="#a855f7" stroke-width="1.5" fill="none">
+          <ellipse cx="550" cy="355" rx="6" ry="2.5"/>
+          <path d="M 544 355 L 544 365 M 556 355 L 556 365"/>
+          <ellipse cx="550" cy="365" rx="6" ry="2.5"/>
+        </g>
+        <text x="550" y="397" text-anchor="middle" fill="#a855f7" font-size="10" font-family="Segoe UI, sans-serif" font-weight="700" letter-spacing="1">MEMORIA</text>
+        <text x="550" y="408" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Segoe UI, sans-serif">Contexto · RAG</text>
+      </g>
+
+      <!-- OUTPUT -->
+      <g>
+        <circle cx="720" cy="225" r="36" fill="none" stroke="#ef4444" stroke-width="0.8" opacity="0.55">
+          <animate attributeName="r" values="36;48;36" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.55;0;0.55" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="720" cy="225" r="26" fill="#0f172a" stroke="#ef4444" stroke-width="1.6" filter="url(#g1)">
+          <animate attributeName="stroke-opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <g stroke="#ef4444" stroke-width="1.5" fill="none">
+          <circle cx="720" cy="225" r="8"/>
+          <circle cx="720" cy="225" r="3" fill="#ef4444"/>
+        </g>
+        <text x="720" y="271" text-anchor="middle" fill="#ef4444" font-size="11" font-family="Segoe UI, sans-serif" font-weight="800" letter-spacing="1">ACCIÓN</text>
+        <text x="720" y="284" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Segoe UI, sans-serif">Lead caliente → Email</text>
+      </g>
+
+      <!-- Particles -->
+      <circle r="3" fill="#22c55e" filter="url(#g1)">
+        <animateMotion dur="4s" repeatCount="indefinite"><mpath href="#mpMain"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" dur="4s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="2.5" fill="#00d4ff" filter="url(#g1)">
+        <animateMotion dur="4s" begin="1.3s" repeatCount="indefinite"><mpath href="#mpMain"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" dur="4s" begin="1.3s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="2.4" fill="#ef4444" filter="url(#g1)">
+        <animateMotion dur="4s" begin="2.7s" repeatCount="indefinite"><mpath href="#mpMain"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" dur="4s" begin="2.7s" repeatCount="indefinite"/>
+      </circle>
+
+      <circle r="2" fill="#f59e0b" filter="url(#g1)">
+        <animateMotion dur="3s" repeatCount="indefinite"><mpath href="#mpTools"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="2" fill="#f59e0b" filter="url(#g1)">
+        <animateMotion dur="3s" begin="1.5s" repeatCount="indefinite"><mpath href="#mpTools"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+      </circle>
+
+      <circle r="2" fill="#a855f7" filter="url(#g1)">
+        <animateMotion dur="3.5s" repeatCount="indefinite"><mpath href="#mpMem"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" dur="3.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle r="2" fill="#a855f7" filter="url(#g1)">
+        <animateMotion dur="3.5s" begin="1.75s" repeatCount="indefinite"><mpath href="#mpMem"/></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" dur="3.5s" begin="1.75s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- Ghost element -->
+      <g filter="url(#g2)">
+        <animateMotion dur="9s" repeatCount="indefinite"><mpath href="#mpGhost"/></animateMotion>
+        <rect x="-9" y="-9" width="18" height="18" rx="4" fill="#00d4ff" opacity="0.75">
+          <animate attributeName="opacity" values="0;0.85;0.85;0" dur="9s" repeatCount="indefinite"/>
+        </rect>
+        <text x="0" y="3" text-anchor="middle" fill="#070b14" font-size="8" font-weight="800">IA</text>
+      </g>
+
+      <!-- LIVE badge -->
+      <g transform="translate(730, 25)">
+        <circle r="4" fill="#ef4444">
+          <animate attributeName="r" values="4;6;4" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="8" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.6">
+          <animate attributeName="r" values="6;14;6" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0;0.6" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <text x="-12" y="4" text-anchor="end" fill="#ef4444" font-size="10" font-weight="800" font-family="Segoe UI, sans-serif" letter-spacing="1.5">LIVE</text>
+      </g>
+
+      <!-- Logo -->
+      <text x="25" y="30" fill="#00d4ff" font-size="12" font-weight="800" font-family="Segoe UI, sans-serif" letter-spacing="2">
+        AGENTE IA
+        <animate attributeName="fill" values="#00d4ff;#a855f7;#22c55e;#00d4ff" dur="9s" repeatCount="indefinite"/>
+      </text>
+      <text x="25" y="45" fill="#94a3b8" font-size="8" font-family="Segoe UI, sans-serif" letter-spacing="1.5">N8N · MCP · WORKFLOW</text>
+
+      <!-- Bottom title -->
+      <text x="400" y="430" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="800" font-family="Segoe UI, sans-serif" letter-spacing="4">
+        FLUJO DE UN AGENTE INTELIGENTE
+        <animate attributeName="fill" values="#e2e8f0;#00d4ff;#e2e8f0" dur="6s" repeatCount="indefinite"/>
+      </text>
+
+      <!-- Status chips -->
+      <g transform="translate(40, 415)">
+        <rect x="0" y="-11" width="90" height="18" rx="9" fill="rgba(0,212,255,.08)" stroke="#00d4ff" stroke-width="0.6"/>
+        <text x="45" y="1" text-anchor="middle" fill="#00d4ff" font-size="8.5" font-weight="700" letter-spacing="1">REACTIVO</text>
+      </g>
+      <g transform="translate(140, 415)">
+        <rect x="0" y="-11" width="90" height="18" rx="9" fill="rgba(34,197,94,.08)" stroke="#22c55e" stroke-width="0.6"/>
+        <text x="45" y="1" text-anchor="middle" fill="#22c55e" font-size="8.5" font-weight="700" letter-spacing="1">SEGURO</text>
+      </g>
+      <g transform="translate(240, 415)">
+        <rect x="0" y="-11" width="110" height="18" rx="9" fill="rgba(168,85,247,.08)" stroke="#a855f7" stroke-width="0.6"/>
+        <text x="55" y="1" text-anchor="middle" fill="#a855f7" font-size="8.5" font-weight="700" letter-spacing="1">EMPRESARIAL</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="hero-badge">📘 GUÍA PROFESIONAL · N8N + IA</div>
+  <h1 class="hero-title">Agentes de Inteligencia Artificial personalizados con n8n</h1>
+  <p class="hero-sub">Desde cero absoluto hasta sistemas inteligentes de grado empresarial</p>
+  <p class="hero-desc">
+    Bienvenido a la guía definitiva para comprender, diseñar y construir <strong>Agentes de Inteligencia Artificial personalizados</strong>
+    utilizando la plataforma de automatización <strong>n8n</strong>. El objetivo de este documento es llevarte desde <strong>cero absoluto</strong>
+    hasta un nivel avanzado donde puedas construir e implementar sistemas inteligentes de grado empresarial. No necesitas experiencia
+    previa en programación ni en inteligencia artificial. Cada concepto complejo se explica con palabras sencillas, ejemplos cotidianos
+    y casos de uso prácticos de la vida real.
+  </p>
+
+  <div class="hero-quote">
+    "Si no puedes explicarlo de forma sencilla, es que no lo entiendes lo suficientemente bien."
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><span class="num">6</span><span class="lbl">Capítulos</span></div>
+    <div class="metric"><span class="num">4</span><span class="lbl">Componentes IA</span></div>
+    <div class="metric"><span class="num">7</span><span class="lbl">Pasos del Marco</span></div>
+    <div class="metric"><span class="num">2</span><span class="lbl">Métodos n8n</span></div>
+    <div class="metric"><span class="num">$2K–$5K</span><span class="lbl">Valor mercado</span></div>
+  </div>
+
+  <div class="datetime-row">
+    <span class="chip">📅 <strong>27/09/2026</strong></span>
+    <span class="chip">🕒 <strong>04:22:16</strong></span>
+    <span class="chip">👨‍💻 <strong>Rubén Sbarsky</strong></span>
+  </div>
+
+</section>
+
+<!-- ============ CAP 1 ============ -->
+<section id="cap1" class="section">
+  <div class="chapter-head">
+    <div class="chapter-icon">1</div>
+    <div>
+      <span class="kicker">Capítulo 1</span>
+      <h2>Fundamentos de los Agentes de Inteligencia Artificial</h2>
+    </div>
+  </div>
+
+  <h3>1.1 ¿Qué es un Agente de IA y para qué sirve?</h3>
+  <p>
+    Un <strong>Agente de Inteligencia Artificial</strong> es un sistema informático capacitado no solo para mantener conversaciones o
+    responder preguntas, sino para <strong>razonar, tomar decisiones autónomas y ejecutar acciones externas</strong> con el fin de
+    alcanzar un objetivo específico predeterminado.
+  </p>
+  <p>
+    A diferencia de un chat tradicional, un agente de IA actúa como un <strong>empleado digital especializado</strong>: analiza la
+    información que recibe, evalúa sus opciones, decide qué herramientas utilizar (como consultar una base de datos o enviar un correo)
+    y ejecuta la tarea completa de principio a fin.
+  </p>
+
+  <h3>1.2 Diferencias clave: Chatbot vs. Automatización Tradicional vs. Agente de IA</h3>
+  <p>Es habitual confundir estos tres términos. A continuación se desglosa cada concepto con ejemplos claros:</p>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title"><span class="dot cyan"></span>1. Chatbot Tradicional</div>
+      <p><strong>Qué hace:</strong> Responde a preguntas basándose en algoritmos rígidos o menús de opciones prediseñadas.</p>
+      <p><strong>Limitación:</strong> No toma decisiones propias ni interactúa con aplicaciones externas de forma razonada.</p>
+      <p><em>Ejemplo cotidiano: un bot telefónico que te dice "Presiona 1 para ventas, presiona 2 para soporte".</em></p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot amber"></span>2. Automatización Tradicional</div>
+      <p><strong>Qué hace:</strong> Ejecuta una secuencia fija de pasos programados ("Si ocurre A, haz B").</p>
+      <p><strong>Limitación:</strong> Es totalmente rígida. Si la información cambia de formato o requiere interpretación, el flujo se rompe.</p>
+      <p><em>Ejemplo cotidiano: una regla en tu correo que guarda automáticamente en una carpeta todos los archivos adjuntos que recibes.</em></p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot green"></span>3. Agente de IA</div>
+      <p><strong>Qué hace:</strong> Recibe un objetivo, analiza el contexto mediante un Modelo de Lenguaje (LLM), decide qué pasos dar y usa herramientas para resolver el problema.</p>
+      <p><em>Ejemplo cotidiano: un asistente al que le dices "Agenda una reunión con los prospectos más interesados de esta semana". El agente busca en los correos, evalúa quiénes tienen interés real, revisa tu agenda, envía las invitaciones y confirma los horarios.</em></p>
+    </div>
+  </div>
+
+  <h4>Tabla Comparativa de Tecnologías</h4>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Característica</th>
+          <th>Chatbot Tradicional</th>
+          <th>Automatización Tradicional</th>
+          <th>Agente de IA</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Toma de Decisiones</strong></td><td>No (algoritmo fijo)</td><td>No (pasos fijos programados)</td><td><strong>Sí</strong> (razona y decide según el objetivo)</td></tr>
+        <tr><td><strong>Flexibilidad</strong></td><td>Nula</td><td>Nula</td><td><strong>Alta</strong> (se adapta a datos no estructurados)</td></tr>
+        <tr><td><strong>Uso de Herramientas</strong></td><td>No utiliza herramientas externas</td><td>Ejecuta acciones prefijadas</td><td><strong>Selecciona dinámicamente qué herramienta usar</strong></td></tr>
+        <tr><td><strong>Capacidad de Razonamiento</strong></td><td>Inexistente</td><td>Inexistente</td><td><strong>Proporcionada por un LLM (Cerebro)</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>1.3 ¿Por qué es importante aprender a construir Agentes de IA hoy?</h3>
+  <p>Las empresas actuales enfrentan cuellos de botella operativos por tareas repetitivas y análisis manuales de datos. Aprender a crear agentes de IA permite:</p>
+  <ul>
+    <li><strong>Automatizar decisiones complejas:</strong> Filtrar clientes, gestionar bandejas de entrada, analizar contratos o coordinar agencias.</li>
+    <li><strong>Alta valorización en el mercado:</strong> Un agente de IA bien diseñado resuelve problemas críticos de negocio y se comercializa a clientes entre <strong>$2,000 y $5,000 USD</strong>.</li>
+  </ul>
+
+  <h3>1.4 Resumen del Capítulo 1</h3>
+  <div class="callout info">
+    <span class="label">INFO · Resumen</span>
+    <ul style="margin:0 0 0 18px">
+      <li>Un <strong>chatbot</strong> solo responde preguntas en un flujo cerrado.</li>
+      <li>Una <strong>automatización tradicional</strong> ejecuta pasos fijos e inmutables.</li>
+      <li>Un <strong>agente de IA</strong> conecta razonamiento lógico con herramientas externas para cumplir un objetivo de forma adaptativa.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ CAP 2 ============ -->
+<section id="cap2" class="section">
+  <div class="chapter-head">
+    <div class="chapter-icon">2</div>
+    <div>
+      <span class="kicker">Capítulo 2</span>
+      <h2>La Anatomía de un Agente de IA — Los 4 Componentes Imprescindibles</h2>
+    </div>
+  </div>
+
+  <p>Para que un agente de IA funcione correctamente, debe contar con <strong>4 componentes fundamentales</strong>. Si falta alguno de estos elementos, el sistema no podrá actuar como un agente real.</p>
+
+  <div class="flow">
+    <div class="flow-node fn-cyan">1. CEREBRO (LLM)<br><span style="font-size:10px;font-weight:500">Razonamiento</span></div>
+  </div>
+  <div class="flow" style="margin-top:-4px">
+    <div class="flow-node fn-green">2. CONEXIONES / HERRAMIENTAS<br><span style="font-size:10px;font-weight:500">APIs · n8n</span></div>
+    <div class="flow-arrow">•</div>
+    <div class="flow-node fn-purple">3. MEMORIA<br><span style="font-size:10px;font-weight:500">Contexto</span></div>
+    <div class="flow-arrow">•</div>
+    <div class="flow-node fn-amber">4. INSTRUCCIONES<br><span style="font-size:10px;font-weight:500">Prompts / Habilidades</span></div>
+  </div>
+
+  <h3>2.1 Componente 1: El Cerebro (Modelo de Lenguaje - LLM)</h3>
+  <p>Es el motor de procesamiento del agente. Le permite comprender el lenguaje humano, analizar situaciones y generar respuestas razonadas.</p>
+
+  <h4>Modelos de Lenguaje más populares y selección según costo/beneficio</h4>
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title"><span class="dot green"></span>OpenAI (ChatGPT)</div>
+      <p>Modelos como <code>gpt-4o</code> o <code>gpt-4o-mini</code> / <code>5.4 nano</code> destacan por ser económicos y eficientes para tareas generales de clasificación y respuesta.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot amber"></span>Anthropic (Claude)</div>
+      <p>Familias como <strong>Claude 3.5 Sonnet</strong>, <strong>Opus</strong> y <strong>Haiku</strong>. Son la opción recomendada cuando se requiere <strong>razonamiento complejo, cálculos avanzados o lógica estricta</strong>, minimizando el margen de error en entornos empresariales.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot cyan"></span>Google (Gemini)</div>
+      <p>Modelos como <strong>Gemini Flash 1.5/2.0</strong>, caracterizados por ventanas de contexto muy amplias y buena relación costo-rendimiento.</p>
+    </div>
+  </div>
+
+  <div class="callout ex">
+    <span class="label">💡 Consejo Profesional · Selección de Modelo</span>
+    Si la tarea implica riesgos financieros o decisiones críticas para una empresa, utiliza <strong>Anthropic Claude Sonnet</strong>; la diferencia de centavos en costo compensa ampliamente la precisión del resultado. Para tareas sencillas de extracción o clasificación básica, <strong>OpenAI</strong> o <strong>Google Gemini</strong> ofrecen un costo por token extremadamente bajo.
+  </div>
+
+  <h3>2.2 Componente 2: Conexiones a Herramientas Externas (APIs y Credenciales)</h3>
+  <p>Un modelo de lenguaje aislado solo genera texto; no puede actuar en el mundo real. Para ejecutar acciones, el agente se conecta a aplicaciones mediante <strong>APIs</strong> (Interfaz de Programación de Aplicaciones) o credenciales de acceso.</p>
+  <div class="callout info">
+    <span class="label">ℹ ¿Qué es una API?</span>
+    Es una combinación segura de letras y números (clave) que actúa como un pase de acceso para que el agente se comunique con herramientas como Google Sheets, Google Calendar, un CRM o un servidor de correo electrónico.
+  </div>
+
+  <h3>2.3 Componente 3: La Memoria</h3>
+  <p>Permite al agente recordar interacciones previas, mantener el hilo conversacional y conservar contexto clave durante la ejecución.</p>
+  <ul>
+    <li><strong>Memoria simple (Window Buffer Memory):</strong> Mantiene los últimos <em>N</em> mensajes de la conversación.</li>
+    <li><strong>Bases de datos vectoriales / RAG:</strong> Para manejar grandes volúmenes de datos históricos o documentación interna de una empresa que exceden el límite de un prompt tradicional.</li>
+  </ul>
+
+  <h3>2.4 Componente 4: Instrucciones y Habilidades (System Prompt)</h3>
+  <p>Son las reglas, el rol y los límites que se le asignan al agente. Definen exactamente <strong>quién es, qué debe evaluar, cómo debe responder y qué restricciones debe respetar</strong>.</p>
+
+  <h3>2.5 Resumen del Capítulo 2</h3>
+  <div class="callout info">
+    <span class="label">INFO · Un agente de IA funcional requiere</span>
+    <ol style="margin:0 0 0 18px">
+      <li><strong>Cerebro (LLM):</strong> Razona y toma decisiones.</li>
+      <li><strong>Herramientas (APIs):</strong> Ejecutan acciones en el mundo exterior.</li>
+      <li><strong>Memoria:</strong> Mantiene el contexto de la tarea o conversación.</li>
+      <li><strong>Instrucciones (Prompts):</strong> Guían el comportamiento y establecen las reglas.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ CAP 3 ============ -->
+<section id="cap3" class="section">
+  <div class="chapter-head">
+    <div class="chapter-icon">3</div>
+    <div>
+      <span class="kicker">Capítulo 3</span>
+      <h2>El Marco de 7 Pasos para Construir Agentes Profesionales</h2>
+    </div>
+  </div>
+
+  <p>Para construir agentes que las empresas estén dispuestas a comprar, se debe seguir una metodología estructurada en 7 pasos secuenciales:</p>
+
+  <div class="flow">
+    <div class="flow-node fn-cyan">1. Definir Objetivo</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node fn-green">2. Trigger</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node fn-amber">3. Prompt</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node fn-purple">4-5. Herramientas y Memoria</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node fn-red">6. Base Conocimiento</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node fn-cyan">7. Pruebas e Iteración</div>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-title">Paso 1 · Definir el Objetivo Concreto</div>
+      <p><strong>Acción:</strong> Delimita una tarea específica y acotada. Evita la tentación de "automatizar toda la empresa" en un solo flujo.</p>
+      <p><strong>Por qué:</strong> Los flujos hipercomplejos e indefinidos fallan con frecuencia y son difíciles de depurar.</p>
+      <p><em>Ejemplo correcto: "Crear un agente que evalúe y clasifique las solicitudes de contacto que llegan desde el formulario web".</em></p>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Paso 2 · Identificar el Disparador (Trigger) y elegir el Tipo de Agente</div>
+      <p><strong>Acción:</strong> Determinar qué evento iniciará la ejecución del agente.</p>
+      <p><strong>Diferencia Crítica de Seguridad:</strong></p>
+      <ul>
+        <li><strong>Agentes Reactivos (Recomendados):</strong> Se activan ante un evento claro (un nuevo formulario web, un correo entrante). Son seguros, controlables y comercialmente viables.</li>
+        <li><strong>Agentes Autónomos:</strong> Operan sin supervisión ni disparadores fijos. Presentan altos riesgos de seguridad, consumo descontrolado de tokens y comportamientos impredecibles en entornos de clientes.</li>
+      </ul>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Paso 3 · Redactar las Instrucciones (Prompts del Sistema)</div>
+      <p><strong>Acción:</strong> Definir el rol del agente, los criterios de evaluación y el formato de salida estructurado (ej. formato JSON).</p>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Paso 4 · Configurar las Herramientas Externas</div>
+      <p><strong>Acción:</strong> Seleccionar e integrar los nodos de n8n correspondientes a las plataformas donde el agente leerá o escribirá datos (Google Sheets, Gmail, Slack, CRM).</p>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Paso 5 · Definir la Estrategia de Memoria</div>
+      <p><strong>Acción:</strong> Evaluar si el agente requiere recordar interacciones pasadas. Si la tarea es de procesamiento puntual (como calificar un formulario individual), puede omitirse o usarse una memoria simple.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Paso 6 · Conectar la Base de Conocimiento o RAG (Si aplica)</div>
+      <p><strong>Acción:</strong> Si el agente necesita consultar manuales, catálogos extensos o políticas internas, se conecta una fuente de datos estructurada o un sistema RAG (Retrieval-Augmented Generation). Si la información es breve, basta con vincular un documento de Google Docs.</p>
+    </div>
+
+    <div class="step">
+      <div class="step-title">Paso 7 · Probar, Establecer Límites (Guardrails) e Iterar</div>
+      <p><strong>Acción:</strong> Someter al agente a pruebas con casos límite (datos incompletos, presupuestos ilógicos), verificar que responda en el formato esperado y corregir errores antes del despliegue final.</p>
+    </div>
+  </div>
+
+  <h3>Checklist de Comprobación del Marco de 7 Pasos</h3>
+  <ul class="checklist">
+    <li><strong>Paso 1:</strong> ¿El objetivo está claramente definido y acotado?</li>
+    <li><strong>Paso 2:</strong> ¿El disparador es reactivo y seguro?</li>
+    <li><strong>Paso 3:</strong> ¿Las instrucciones especifican el formato de salida deseado?</li>
+    <li><strong>Paso 4:</strong> ¿Todas las herramientas externas tienen sus credenciales/APIs conectadas?</li>
+    <li><strong>Paso 5:</strong> ¿Se seleccionó la memoria adecuada según la persistencia requerida?</li>
+    <li><strong>Paso 6:</strong> ¿La base de conocimientos cubre la información que el agente necesita?</li>
+    <li><strong>Paso 7:</strong> ¿Se realizaron pruebas con datos reales y casos de borde?</li>
+  </ul>
+
+  <h3>Resumen del Capítulo 3</h3>
+  <div class="callout info">
+    <span class="label">INFO · Resumen</span>
+    El desarrollo profesional de agentes exige seguir un proceso disciplinado: definir el objetivo, asegurar un disparador reactivo, estructurar prompts sólidos, conectar herramientas, gestionar la memoria/conocimiento y testear exhaustivamente.
+  </div>
+</section>
+
+<!-- ============ CAP 4 ============ -->
+<section id="cap4" class="section">
+  <div class="chapter-head">
+    <div class="chapter-icon">4</div>
+    <div>
+      <span class="kicker">Capítulo 4</span>
+      <h2>Creación de Agentes con n8n — Manual vs. Acelerado con MCP y Claude</h2>
+    </div>
+  </div>
+
+  <h3>4.1 ¿Qué es n8n?</h3>
+  <p><strong>n8n</strong> es una plataforma de automatización de flujos de trabajo basada en nodos. Permite construir desde automatizaciones lineales simples hasta agentes de inteligencia artificial complejos e interconectados.</p>
+
+  <h3>4.2 Método 1 · Construcción Manual en n8n (Paso a Paso)</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-title">Crear un nuevo Workflow</div>
+      <p>En el panel principal de n8n, haz clic en <strong>"Create Workflow"</strong> (Crear flujo de trabajo).</p>
+    </div>
+    <div class="step">
+      <div class="step-title">Añadir el nodo Agente de IA</div>
+      <p>Pulsa el botón <code>+</code>, busca el nodo <strong>"AI Agent"</strong> y agrégalo al lienzo.</p>
+    </div>
+    <div class="step">
+      <div class="step-title">Conectar el Modelo de Chat (Chat Model)</div>
+      <p>En la entrada de <code>Model</code> del nodo Agente, selecciona el proveedor deseado (ej. <em>Anthropic Chat Model</em> u <em>OpenAI Chat Model</em>).</p>
+    </div>
+    <div class="step">
+      <div class="step-title">Configurar Credenciales/API Key</div>
+      <ul>
+        <li>Ve al panel del proveedor (ej. <code>platform.claude.ai</code> o <code>platform.openai.com</code>).</li>
+        <li>Crea una nueva clave API y cópiala.</li>
+        <li>En n8n, selecciona <strong>"Create New Credential"</strong>, pega la API Key y guarda los cambios.</li>
+      </ul>
+    </div>
+    <div class="step">
+      <div class="step-title">Vincular Herramientas (Tools)</div>
+      <p>Añade los nodos de herramientas necesarias (ej. <em>Google Sheets</em>, <em>Google Calendar</em>) conectándolos a la sección <code>Tools</code> del nodo Agente.</p>
+    </div>
+    <div class="step">
+      <div class="step-title">Definir el System Message</div>
+      <p>Escribe las instrucciones principales dentro del apartado de mensaje de sistema en la configuración del agente.</p>
+    </div>
+  </div>
+
+  <h3>4.3 Método 2 · Método Acelerado con MCP y Claude Desktop</h3>
+  <p>El <strong>Model Context Protocol (MCP)</strong> actúa como un puente de comunicación directa entre la aplicación de escritorio de Claude y tu instancia de n8n. Permite crear flujos completos mediante instrucciones en lenguaje natural sin tener que ensamblar nodo por nodo manualmente.</p>
+
+  <div class="flow">
+    <div class="flow-node fn-amber">Claude Desktop<br><span style="font-size:10px;font-weight:500">Instrucción NL</span></div>
+    <div class="flow-arrow">⟷</div>
+    <div class="flow-node fn-cyan">MCP (Puente)</div>
+    <div class="flow-arrow">⟷</div>
+    <div class="flow-node fn-green">Instancia n8n<br><span style="font-size:10px;font-weight:500">Workflow Listo</span></div>
+  </div>
+
+  <h3>4.4 Paso a Paso Numerado para Conectar Claude con n8n vía MCP</h3>
+  <div class="steps">
+    <div class="step"><div class="step-title">Abrir Claude Desktop</div><p>Abre la aplicación <strong>Claude Desktop</strong> en tu equipo.</p></div>
+    <div class="step"><div class="step-title">Ir a Conectores</div><p>Ve a la sección de configuración/personalización (arriba a la izquierda) y selecciona <strong>"Conectores" (Connectors)</strong>.</p></div>
+    <div class="step"><div class="step-title">Agregar conector</div><p>Haz clic en <strong>"Agregar conector"</strong> y selecciona <strong>n8n</strong> de la lista de conectores nativos.</p></div>
+    <div class="step"><div class="step-title">Conectar</div><p>Pulsa <strong>"Conectar"</strong>: Se abrirá una ventana solicitando el usuario y contraseña o la API Key de tu instancia de n8n.</p></div>
+    <div class="step"><div class="step-title">Permitir siempre (opcional recomendado)</div><p>Selecciona la opción <strong>"Permitir siempre"</strong> en las autorizaciones para otorgarle fluidez en la ejecución de comandos.</p></div>
+  </div>
+
+  <h3>4.5 Prompt de Creación Automática mediante MCP</h3>
+  <p>Una vez conectado el MCP, puedes enviar un prompt como el siguiente a Claude Desktop para que construya la arquitectura completa en n8n automáticamente:</p>
+
+  <div class="callout ex">
+    <span class="label">💬 Prompt de Creación para Claude (MCP)</span>
+    <em>"Conéctate a mi instancia de n8n por MCP y crea una automatización para calificar leads con inteligencia artificial. Cuando llegue un lead por un formulario web, analiza la información con un agente de IA y clasifícalo como caliente, tibio o frío. Guarda todos los leads en un Google Sheets junto con su nombre, empresa, email, presupuesto, urgencia, clasificación y resumen del motivo. Si detectas un lead caliente, envíame un correo automáticamente con toda la información y la recomendación de la siguiente acción. Usa buenas prácticas de n8n, agrega manejo de errores y deja el workflow listo para activar."</em>
+  </div>
+
+  <h3>4.6 Resumen del Capítulo 4</h3>
+  <div class="callout info">
+    <span class="label">INFO · Resumen</span>
+    <ul style="margin:0 0 0 18px">
+      <li><strong>n8n</strong> permite construir agentes de forma manual ensamblando nodos de modelo, herramientas y memoria.</li>
+      <li>El protocolo <strong>MCP</strong> permite conectar Claude Desktop con n8n para generar la estructura completa del flujo mediante instrucciones en lenguaje natural, reduciendo drásticamente el tiempo de desarrollo.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ CAP 5 ============ -->
+<section id="cap5" class="section">
+  <div class="chapter-head">
+    <div class="chapter-icon">5</div>
+    <div>
+      <span class="kicker">Capítulo 5</span>
+      <h2>Caso Práctico Completo — Agente Calificador de Leads en Vivo</h2>
+    </div>
+  </div>
+
+  <p>A continuación se detalla el funcionamiento interno del <strong>Agente Clasificador de Leads</strong>, un caso práctico empresarial desarrollado e implementado en n8n.</p>
+
+  <div class="flow">
+    <div class="flow-node fn-green">Formulario Web<br><span style="font-size:10px;font-weight:500">Trigger Datos</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node fn-cyan">Agente IA Clasificador<br><span style="font-size:10px;font-weight:500">Claude + Prompt System</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node fn-amber">Google Sheets<br><span style="font-size:10px;font-weight:500">Registro General</span></div>
+  </div>
+  <div class="flow" style="margin-top:-4px">
+    <div class="flow-node fn-purple">Filtro: ¿Es Caliente?</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node fn-red">Email de Alerta<br><span style="font-size:10px;font-weight:500">Acción Inmediata</span></div>
+  </div>
+
+  <h3>5.1 Arquitectura del Flujo</h3>
+  <ol>
+    <li><strong>Trigger (Disparador):</strong> Nodo <em>n8n Form Trigger</em> (Formulario de captación web).</li>
+    <li><strong>Procesador (Agente de IA):</strong> Nodo <em>AI Agent</em> conectado a un modelo LLM (ej. <em>Anthropic Claude 3.5 Sonnet</em>).</li>
+    <li><strong>Almacenamiento:</strong> Nodo <em>Google Sheets</em> para registrar todas las entradas de prospectos.</li>
+    <li><strong>Enrutador Lógico:</strong> Nodo <em>If / Switch</em> que evalúa si la clasificación del agente fue <code>"caliente"</code>.</li>
+    <li><strong>Acción de Notificación:</strong> Nodo <em>Gmail / Email</em> que envía una alerta inmediata a la fuerza de ventas con el diagnóstico y plan de acción.</li>
+  </ol>
+
+  <h3>5.2 El Prompt Exacto del Sistema para el Agente (System Message)</h3>
+  <p>Dentro del nodo Agente de IA, se configura la siguiente instrucción del sistema:</p>
+  <pre class="code">Eres un agente calificador de leads para una agencia de inteligencia artificial. 
+Tu trabajo es analizar a un prospecto y clasificarlo para que el equipo de ventas priorice a quién contactar primero.
+
+Evalúa estas tres variables:
+1. Ajuste del proyecto a soluciones de automatización con IA.
+2. Presupuesto disponible comparado con el valor de mercado.
+3. Urgencia y plazo de entrega.
+
+Clasifica el lead estrictamente en una de estas tres categorías:
+- caliente (High fit, presupuesto adecuado >= $1,000 USD, plazo definido).
+- tibio (Fit aceptable o presupuesto medio).
+- frío (Presupuesto insuficiente < $500 USD o proyecto no realizable).
+
+Devuelve tu respuesta estructurada indicando:
+- Clasificación (caliente/tibio/frío).
+- Resumen del problema.
+- Motivo de la clasificación.
+- Recomendación de la siguiente acción para el equipo de ventas.</pre>
+
+  <h3>5.3 Pruebas en Tiempo Real y Comparativa de Ejecución</h3>
+  <p>Para validar el agente, se realizan dos pruebas con datos diferentes:</p>
+
+  <div class="card">
+    <div class="card-title"><span class="dot green"></span>Prueba 1 · Prospecto de Alto Valor (Lead Caliente)</div>
+    <p><strong>Datos de entrada:</strong> Nombre: Juan Pérez | Empresa: Camaleón | Proyecto: "Necesito una automatización que califique los leads de mi web" | Presupuesto: <strong>$3,000 USD</strong> | Urgencia: <strong>2 semanas</strong>.</p>
+    <p><strong>Resultado del Agente:</strong></p>
+    <ul>
+      <li><strong>Clasificación:</strong> <code>Caliente</code>.</li>
+      <li><strong>Evaluación:</strong> El problema es específico, el presupuesto de $3,000 USD es óptimo para el valor de mercado y el plazo de 2 semanas es adecuado.</li>
+      <li><strong>Acción ejecutada:</strong> Registrado en Google Sheets + <strong>Email enviado inmediatamente al equipo de ventas</strong> indicando: <em>"Agendar llamada de descubrimiento para entender el flujo y preparar propuesta técnica."</em></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot red"></span>Prueba 2 · Prospecto de Bajo Presupuesto (Lead Frío)</div>
+    <p><strong>Datos de entrada:</strong> Nombre: Juan Pérez | Empresa: Prueba | Proyecto: "Necesito un agente de IA" | Presupuesto: <strong>$50 USD</strong> | Urgencia: Indefinida.</p>
+    <p><strong>Resultado del Agente:</strong></p>
+    <ul>
+      <li><strong>Clasificación:</strong> <code>Frío / Tibio</code>.</li>
+      <li><strong>Evaluación:</strong> El presupuesto de $50 USD está fuera del rango de mercado para una solución a medida.</li>
+      <li><strong>Acción ejecutada:</strong> Registrado en Google Sheets. El filtro evalúa <code>False</code> para lead caliente, por lo que <strong>NO se envía correo de alerta</strong>, evitando perder tiempo operativo del equipo.</li>
+    </ul>
+  </div>
+
+  <h3>5.4 Resumen del Capítulo 5</h3>
+  <div class="callout info">
+    <span class="label">INFO · Resumen</span>
+    Un agente clasificador bien diseñado evalúa variables de negocio (presupuesto, ajuste, urgencia), toma decisiones consistentes y automatiza el enrutamiento para priorizar la atención humana en oportunidades de alto valor.
+  </div>
+</section>
+
+<!-- ============ CAP 6 ============ -->
+<section id="cap6" class="section">
+  <div class="chapter-head">
+    <div class="chapter-icon">6</div>
+    <div>
+      <span class="kicker">Capítulo 6</span>
+      <h2>Conclusiones, Glosario y Sección de Cierre</h2>
+    </div>
+  </div>
+
+  <h3>6.1 Resumen General de Todo lo Aprendido</h3>
+  <ol>
+    <li>Un agente de IA combina el razonamiento de un modelo de lenguaje (LLM) con el acceso a herramientas externas mediante APIs para cumplir objetivos específicos.</li>
+    <li>Todo agente profesional consta de 4 pilares: <strong>Cerebro (LLM), Herramientas, Memoria e Instrucciones</strong>.</li>
+    <li>La metodología de 7 pasos garantiza un desarrollo estructurado, seguro y enfocado en agentes reactivos orientados a negocio.</li>
+    <li><strong>n8n</strong> complementado con el protocolo <strong>MCP</strong> permite acelerar la creación de flujos complejos mediante instrucciones en lenguaje natural.</li>
+  </ol>
+
+  <h3>6.2 Lista de Conceptos Clave</h3>
+  <div class="grid-2">
+    <div class="card"><div class="card-title"><span class="dot green"></span>Agente Reactivo</div><p>Sistema que se activa únicamente al recibir un evento o disparador específico.</p></div>
+    <div class="card"><div class="card-title"><span class="dot cyan"></span>LLM (Large Language Model)</div><p>Modelo fundacional que aporta razonamiento al agente.</p></div>
+    <div class="card"><div class="card-title"><span class="dot amber"></span>API</div><p>Clave de acceso que permite conectar el agente con aplicaciones externas.</p></div>
+    <div class="card"><div class="card-title"><span class="dot purple"></span>MCP</div><p>Protocolo para conectar modelos de lenguaje (como Claude) directamente con herramientas de automatización como n8n.</p></div>
+    <div class="card"><div class="card-title"><span class="dot red"></span>System Message</div><p>Conjunto de reglas e instrucciones principales que rigen la conducta del agente.</p></div>
+  </div>
+
+  <h3>6.3 Errores que NUNCA Debes Cometer</h3>
+  <div class="callout err"><span class="label">❌ Error 1</span><strong>Intentar automatizar procesos complejos e indefinidos de golpe:</strong> Empieza siempre por bloques pequeños y objetivos acotados.</div>
+  <div class="callout err"><span class="label">❌ Error 2</span><strong>Desplegar agentes autónomos sin supervisión en clientes:</strong> Prefiere siempre arquitectura de <strong>agentes reactivos</strong> para evitar riesgos de seguridad y costos desmedidos.</div>
+  <div class="callout err"><span class="label">❌ Error 3</span><strong>Entregar un agente a un cliente sin realizar pruebas de estrés:</strong> Prueba siempre el sistema con entradas malformadas, incompletas o de caso de borde antes de pasarlo a producción.</div>
+  <div class="callout err"><span class="label">❌ Error 4</span><strong>Ignorar la relación costo-beneficio del modelo LLM:</strong> No gastes en modelos costosos para tareas simples de extracción, ni ahorres en modelos económicos para tareas complejas que requieren precisión.</div>
+  <div class="callout err"><span class="label">❌ Error 5</span><strong>No definir un formato de salida estructurado:</strong> Si el agente no devuelve sus datos en formatos claros (ej. JSON), los nodos siguientes del flujo no podrán procesar la información.</div>
+
+  <h3>6.4 Recomendaciones para Seguir Aprendiendo</h3>
+  <ul>
+    <li>Practica creando tus propios agentes reactivos simples (ej. clasificadores de correo o redactores de resúmenes).</li>
+    <li>Explora la documentación oficial de nodos de n8n y prueba la integración con MCP mediante Claude Desktop.</li>
+    <li>Únete a comunidades especializadas en automatización e IA para mantenerte actualizado sobre nuevos modelos y buenas prácticas.</li>
+  </ul>
+
+  <h3>6.5 Ejercicios Prácticos con Soluciones Explicadas</h3>
+
+  <div class="exercise">
+    <h4>Ejercicio 1 · Diseñar un Agente Filtrador de Correos Spam</h4>
+    <p><strong>Consigna:</strong> Diseña la arquitectura de un agente que revise los correos de soporte de una empresa y decida si deben responderse, archivarse o marcarse como urgentes.</p>
+    <div class="solution">
+      <strong>Solución Explicada:</strong>
+      <ol style="margin-top:6px">
+        <li><em>Trigger:</em> Email Read / New Email Received (Disparador reactivo).</li>
+        <li><em>Cerebro:</em> Nodo LLM (ej. OpenAI <code>gpt-4o-mini</code>).</li>
+        <li><em>Instrucciones:</em> Analizar el cuerpo del correo. Si pide soporte técnico, clasificar como <code>Soporte</code>; si es publicidad, clasificar como <code>Spam</code>; si es una queja de cliente activo, clasificar como <code>Urgente</code>.</li>
+        <li><em>Herramientas:</em> Gmail (para mover de carpeta o etiquetar).</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <h4>Ejercicio 2 · Creación del Workflow en n8n mediante MCP</h4>
+    <p><strong>Consigna:</strong> Redacta el prompt que enviarías a Claude Desktop conectado por MCP para crear un flujo que lea eventos de Google Calendar y envíe un resumen por Slack.</p>
+    <div class="solution">
+      <strong>Solución Explicada:</strong>
+      <em>"Conéctate a mi n8n por MCP. Crea una automatización que se ejecute todas las mañanas a las 8:00 AM, lea los eventos agendados en Google Calendar para el día de hoy, los procese con un agente de IA para crear un resumen ejecutivo organizado por prioridades y envíe ese resumen al canal de Slack de la empresa."</em>
+    </div>
+  </div>
+
+  <h3>6.6 Preguntas Frecuentes (FAQ)</h3>
+
+  <div class="acc">
+    <div class="acc-head">¿Es necesario saber programar en Python o JavaScript para usar n8n?</div>
+    <div class="acc-body"><div class="acc-inner">
+      No. n8n es una plataforma esencialmente <em>low-code/no-code</em> basada en nodos visuales. El uso de MCP permite incluso generar los flujos hablando en español técnico simple.
+    </div></div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head">¿Cuánto cuesta mantener un agente de IA funcionando?</div>
+    <div class="acc-body"><div class="acc-inner">
+      Los costos principales se dividen en el hosting de n8n (o su versión Cloud) y el consumo de tokens de las APIs de los modelos de lenguaje (OpenAI, Anthropic, Google). Para flujos de volumen medio, los costos de API suelen ser de centavos o muy pocos dólares al mes.
+    </div></div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head">¿Por qué se recomienda usar agentes reactivos en lugar de autónomos?</div>
+    <div class="acc-body"><div class="acc-inner">
+      Los agentes reactivos se activan por eventos concretos, son predecibles, seguros, fáciles de auditar y no generan consumos accidentales de recursos.
+    </div></div>
+  </div>
+
+  <h3>6.7 Glosario de Términos Técnicos</h3>
+  <div class="card"><div class="card-title"><span class="dot cyan"></span>Agente de IA</div><p>Sistema que percibe su entorno, razona usando un LLM y ejecuta acciones con herramientas para alcanzar un objetivo.</p></div>
+  <div class="card"><div class="card-title"><span class="dot amber"></span>API Key</div><p>Clave alfanumérica privada que autentica el acceso a un servicio web o modelo de lenguaje.</p></div>
+  <div class="card"><div class="card-title"><span class="dot cyan"></span>LLM (Large Language Model)</div><p>Modelo de inteligencia artificial entrenado con grandes volúmenes de texto para comprender y generar lenguaje humano.</p></div>
+  <div class="card"><div class="card-title"><span class="dot purple"></span>MCP (Model Context Protocol)</div><p>Estándar abierto que permite a modelos de IA interactuar de forma segura con herramientas y aplicaciones externas.</p></div>
+  <div class="card"><div class="card-title"><span class="dot green"></span>n8n</div><p>Plataforma de automatización de flujos de trabajo basada en nodos.</p></div>
+  <div class="card"><div class="card-title"><span class="dot red"></span>RAG (Retrieval-Augmented Generation)</div><p>Técnica que combina la búsqueda de datos en una base de conocimientos con la generación de texto del LLM para responder con información precisa y actualizada.</p></div>
+  <div class="card"><div class="card-title"><span class="dot amber"></span>System Message / Prompt</div><p>Instrucción primaria que define el rol, comportamiento y reglas de un agente de IA.</p></div>
+  <div class="card"><div class="card-title"><span class="dot cyan"></span>Token</div><p>Unidad básica de procesamiento de texto utilizada por los modelos de lenguaje (aproximadamente 4 caracteres o 0.75 palabras).</p></div>
+  <div class="card"><div class="card-title"><span class="dot green"></span>Trigger</div><p>Evento inicial que desencadena la ejecución automática de un flujo de trabajo.</p></div>
+
+  <h3>6.8 Fuentes</h3>
+  <p>Consulta la pestaña <strong>📚 Fuentes</strong> para ver el recurso original completo.</p>
+</section>
+
+<!-- ============ EJERCICIOS ============ -->
+<section id="ejercicios" class="section">
+  <div class="chapter-head">
+    <div class="chapter-icon">📝</div>
+    <div>
+      <span class="kicker">Práctica</span>
+      <h2>Ejercicios — Aprender Haciendo</h2>
+    </div>
+  </div>
+
+  <p>
+    Pon a prueba todo lo aprendido en los 6 capítulos con <strong>15 ejercicios prácticos</strong> organizados en tres niveles
+    de dificultad creciente. Cada ejercicio incluye su <strong>tipo</strong>, el <strong>enunciado</strong> y una
+    <strong>solución paso a paso</strong> con la explicación causal y el error típico a evitar.
+  </p>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="card-title"><span class="dot green"></span>Nivel Básico · 5 ejercicios</div>
+      <p>Afianza los fundamentos: qué es un agente, sus 4 componentes, el marco de 7 pasos y la diferencia frente a chatbots y automatizaciones tradicionales.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot amber"></span>Nivel Intermedio · 6 ejercicios</div>
+      <p>Aplicación práctica: selección de modelo LLM, diseño de workflows en n8n, redacción de System Prompts, simulación MCP y diagnóstico de errores.</p>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="dot red"></span>Nivel Avanzado · 4 ejercicios</div>
+      <p>Consolidación: clasificación real de leads, checklist de validación en producción, estrategia de memoria + RAG y análisis de guardrails.</p>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <span class="label">ℹ Cómo usar esta sección</span>
+    Intenta resolver cada ejercicio por tu cuenta <strong>antes</strong> de desplegar la solución. Usa el botón
+    <em>"Ver solución paso a paso"</em> para comparar tu razonamiento con el del tutorial.
+  </div>
+
+  <!-- ===== NIVEL BÁSICO ===== -->
+  <h3>Nivel Básico</h3>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 1 · ¿Qué es un agente de IA?</h4>
+      <span class="dif-badge dif-basica">Básica</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Opción múltiple</p>
+    <p><strong>Enunciado:</strong> ¿Cuál de las siguientes afirmaciones describe mejor a un agente de IA según el tutorial?</p>
+    <ul class="opt-list">
+      <li><strong>A)</strong> Responde solo con menús prediseñados y no interpreta datos nuevos.</li>
+      <li><strong>B)</strong> Ejecuta siempre una regla fija "si ocurre A, haz B" sin razonar.</li>
+      <li><strong>C)</strong> Usa un LLM para analizar contexto, decidir pasos y emplear herramientas con el fin de cumplir un objetivo.</li>
+      <li><strong>D)</strong> Únicamente guarda archivos adjuntos en carpetas automáticamente.</li>
+    </ul>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Recordar que un chatbot tradicional responde con algoritmos rígidos o menús.</li>
+          <li>Recordar que la automatización tradicional ejecuta pasos fijos programados.</li>
+          <li>Identificar que un agente de IA razona, decide y selecciona herramientas dinámicamente.</li>
+          <li>Comparar las opciones: la C menciona LLM, análisis de contexto, decisión y uso de herramientas.</li>
+          <li>Concluir que la respuesta correcta es <strong>C</strong>.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          El agente se diferencia porque conecta razonamiento lógico con herramientas externas para alcanzar un objetivo de forma adaptativa.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Confundir al agente de IA con un chatbot o con una automatización tradicional de pasos fijos.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 2 · Verdadero o falso justificado</h4>
+      <span class="dif-badge dif-basica">Básica</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Verdadero/Falso justificado</p>
+    <p><strong>Enunciado:</strong> "Un agente de IA puede funcionar correctamente solo con un modelo de lenguaje, sin herramientas, sin memoria y sin instrucciones". Indica si es verdadero o falso y justifica.</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Revisar la anatomía de un agente de IA.</li>
+          <li>Recordar que los cuatro componentes imprescindibles son: cerebro (LLM), conexiones/herramientas, memoria e instrucciones.</li>
+          <li>Observar que el enunciado elimina tres de los cuatro componentes.</li>
+          <li>Concluir que es <strong>Falso</strong>.</li>
+          <li>Justificar que, si falta alguno de los componentes fundamentales, el sistema no podrá actuar como un agente real.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          Un LLM aislado solo genera texto; necesita herramientas para actuar, memoria para conservar contexto e instrucciones para guiar su comportamiento.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Creer que un modelo de lenguaje por sí solo ya es un agente completo.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 3 · Emparejamiento de componentes</h4>
+      <span class="dif-badge dif-basica">Básica</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Emparejamiento</p>
+    <p><strong>Enunciado:</strong> Relaciona cada componente con su función.</p>
+
+    <div class="grid-2">
+      <div class="pair-box">
+        <span class="pair-title">Componentes</span>
+        <ol>
+          <li>Cerebro (LLM)</li>
+          <li>Conexiones/API</li>
+          <li>Memoria</li>
+          <li>System Prompt</li>
+        </ol>
+      </div>
+      <div class="pair-box">
+        <span class="pair-title">Funciones</span>
+        <ul style="list-style:none;margin-left:0">
+          <li><strong>a)</strong> Define reglas, rol, límites y comportamiento.</li>
+          <li><strong>b)</strong> Razona, analiza situaciones y genera respuestas.</li>
+          <li><strong>c)</strong> Permite conectar el agente con aplicaciones externas mediante una clave segura.</li>
+          <li><strong>d)</strong> Conserva interacciones previas o contexto clave.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Identificar que el cerebro es el LLM y se encarga del razonamiento: <strong>1-b</strong>.</li>
+          <li>Reconocer que la API o credencial sirve como acceso seguro a herramientas externas: <strong>2-c</strong>.</li>
+          <li>Recordar que la memoria mantiene el hilo conversacional o contexto: <strong>3-d</strong>.</li>
+          <li>Asociar el System Prompt con las instrucciones y reglas del agente: <strong>4-a</strong>.</li>
+          <li>Resultado final: <strong>1-b, 2-c, 3-d, 4-a</strong>.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          Cada componente cumple una función distinta e imprescindible dentro de la anatomía del agente.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Confundir la API con el LLM o la memoria con las instrucciones del sistema.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 4 · Ordenar el marco de 7 pasos</h4>
+      <span class="dif-badge dif-basica">Básica</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Ordenamiento</p>
+    <p><strong>Enunciado:</strong> Ordena correctamente los 7 pasos del marco para construir agentes profesionales.</p>
+
+    <div class="pair-box">
+      <span class="pair-title">Pasos desordenados</span>
+      <ul>
+        <li>Definir la estrategia de memoria.</li>
+        <li>Probar, establecer guardrails e iterar.</li>
+        <li>Configurar herramientas externas.</li>
+        <li>Definir el objetivo concreto.</li>
+        <li>Conectar base de conocimiento o RAG si aplica.</li>
+        <li>Identificar el disparador y elegir el tipo de agente.</li>
+        <li>Redactar las instrucciones y el formato de salida.</li>
+      </ul>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>El primer paso debe ser definir el objetivo concreto.</li>
+          <li>Luego, identificar el disparador y elegir el tipo de agente.</li>
+          <li>Después, redactar las instrucciones y el formato de salida.</li>
+          <li>A continuación, configurar las herramientas externas.</li>
+          <li>Seguir con la estrategia de memoria.</li>
+          <li>Luego, conectar base de conocimiento o RAG si aplica.</li>
+          <li>Finalizar con pruebas, guardrails e iteración.</li>
+        </ol>
+        <p style="margin-top:8px"><strong>Orden correcto:</strong> Definir objetivo → Identificar disparador y tipo de agente → Redactar instrucciones → Configurar herramientas → Definir memoria → Conectar base de conocimiento/RAG → Probar, guardrails e iterar.</p>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          El marco de 7 pasos es secuencial y comienza por acotar el objetivo antes de elegir tecnología o herramientas.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Empezar configurando herramientas o modelos antes de tener claro el objetivo y el disparador.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 5 · Agente autónomo vs. agente reactivo</h4>
+      <span class="dif-badge dif-basica">Básica</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Pregunta abierta</p>
+    <p><strong>Enunciado:</strong> Un equipo propone crear un agente que revise redes sociales cada minuto y actúe por iniciativa propia, sin un evento definido y sin supervisión. ¿Qué tipo de agente sería y por qué el tutorial recomienda evitarlo?</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Identificar que no hay un disparador fijo ni supervisión.</li>
+          <li>Reconocer que eso corresponde a un <strong>agente autónomo</strong>.</li>
+          <li>Recordar los riesgos mencionados: altos riesgos de seguridad, consumo descontrolado de tokens y comportamientos impredecibles.</li>
+          <li>Comparar con los agentes reactivos, que se activan ante eventos claros y son seguros, controlables y comercialmente viables.</li>
+          <li>Concluir que se recomienda evitar el agente autónomo en entornos de clientes y preferir un agente reactivo.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          Los agentes reactivos permiten previsibilidad, auditoría y control de costos, mientras que los autónomos pueden actuar de formas no deseadas.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Confundir autonomía total con inteligencia avanzada y desplegarla sin supervisión.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ===== NIVEL INTERMEDIO ===== -->
+  <h3>Nivel Intermedio</h3>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 6 · Selección del modelo LLM adecuado</h4>
+      <span class="dif-badge dif-intermedia">Intermedia</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Selección de modelo LLM</p>
+    <p><strong>Enunciado:</strong> Una empresa necesita un agente que analice contratos financieros complejos y haga cálculos avanzados con mínimo margen de error. Para otra tarea, solo requiere clasificar correos simples de bajo riesgo. ¿Qué modelo recomendaría en cada caso según el tutorial y por qué?</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Identificar que la primera tarea implica riesgos financieros y decisiones críticas.</li>
+          <li>Recordar el consejo del tutorial: para razonamiento complejo, cálculos avanzados o lógica estricta, usar <strong>Anthropic Claude Sonnet</strong>.</li>
+          <li>Justificar que la diferencia de centavos en costo compensa la precisión del resultado.</li>
+          <li>Para la segunda tarea, reconocer que es clasificación básica de bajo riesgo.</li>
+          <li>Recordar que para extracción o clasificación básica, <strong>OpenAI</strong> o <strong>Google Gemini</strong> ofrecen costo por token muy bajo.</li>
+          <li>Concluir: <strong>Claude Sonnet</strong> para contratos financieros; <strong>OpenAI o Gemini</strong> para clasificación simple.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          La selección del LLM debe equilibrar precisión y costo según el riesgo y la complejidad de la tarea.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Usar un modelo económico para una tarea crítica o un modelo costoso para una clasificación simple.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 7 · Diseño de un workflow en n8n</h4>
+      <span class="dif-badge dif-intermedia">Intermedia</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Diseño de flujo n8n</p>
+    <p><strong>Enunciado:</strong> Diseña la arquitectura básica de un workflow en n8n para recibir solicitudes de demostración desde un formulario web, analizarlas con un agente de IA, guardarlas en Google Sheets y, si la solicitud es de prioridad alta, enviar una notificación por Gmail.</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Colocar un nodo <strong>Form Trigger</strong> como disparador reactivo para recibir los datos del formulario.</li>
+          <li>Añadir un nodo <strong>AI Agent</strong> y conectarlo a un Chat Model, por ejemplo Anthropic u OpenAI.</li>
+          <li>Configurar el System Message del agente para que evalúe la solicitud y devuelva una clasificación estructurada, como <em>prioridad alta</em> o <em>prioridad normal</em>.</li>
+          <li>Vincular un nodo <strong>Google Sheets</strong> en la sección Tools o como paso posterior para registrar todas las solicitudes.</li>
+          <li>Añadir un nodo <strong>If/Switch</strong> que evalúe si la clasificación fue "prioridad alta".</li>
+          <li>Conectar la salida verdadera del If/Switch a un nodo <strong>Gmail</strong> para enviar la alerta.</li>
+          <li>Dejar la salida falsa sin notificación o como fin del flujo.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          El flujo usa un trigger reactivo, un agente que decide y herramientas externas para guardar y notificar, siguiendo la arquitectura del caso práctico del tutorial.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          No definir un formato de salida estructurado, lo que impide que el nodo If/Switch evalúe correctamente la clasificación.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 8 · Redacción de un System Prompt</h4>
+      <span class="dif-badge dif-intermedia">Intermedia</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Redacción de System Prompt</p>
+    <p><strong>Enunciado:</strong> Redacta un System Prompt para un agente que clasifique tickets de soporte en tres categorías: urgente, normal y spam. Debe evaluar impacto, si el cliente está activo y la claridad del mensaje. Debe devolver la categoría, un resumen, el motivo y una acción recomendada en formato JSON.</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Definir el rol: "Eres un agente clasificador de tickets de soporte".</li>
+          <li>Indicar el objetivo: analizar cada ticket y priorizarlo para el equipo.</li>
+          <li>Especificar las variables a evaluar: impacto, cliente activo y claridad del mensaje.</li>
+          <li>Establecer las categorías exactas: <em>urgente</em>, <em>normal</em>, <em>spam</em>.</li>
+          <li>Pedir una salida estructurada en JSON.</li>
+          <li>Incluir los campos obligatorios: categoría, resumen, motivo y acción recomendada.</li>
+          <li>Añadir restricciones: no inventar datos y clasificar estrictamente en una de las tres categorías.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          El System Prompt define rol, criterios, formato de salida y límites, lo que permite que los nodos posteriores procesen la información.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Omitir el formato de salida estructurado, lo que dificulta el uso automatizado de la respuesta.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 9 · Simulación MCP</h4>
+      <span class="dif-badge dif-intermedia">Intermedia</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Simulación MCP</p>
+    <p><strong>Enunciado:</strong> Escribe una instrucción en lenguaje natural que enviarías a Claude Desktop, conectado por MCP a tu instancia de n8n, para crear un workflow que cada lunes a las 9:00 lea los eventos de Google Calendar de la semana, los resuma con IA y publique el resumen en Slack.</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Indicar que se conecte a la instancia de n8n por MCP.</li>
+          <li>Pedir la creación de una automatización con disparador programado para cada lunes a las 9:00.</li>
+          <li>Solicitar que lea los eventos de Google Calendar correspondientes a la semana.</li>
+          <li>Pedir que un agente de IA procese los eventos y genere un resumen ejecutivo organizado por prioridades.</li>
+          <li>Indicar que el resumen se envíe a un canal de Slack.</li>
+          <li>Solicitar buenas prácticas de n8n, manejo de errores y que el workflow quede listo para activar.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          MCP actúa como puente entre Claude Desktop y n8n, permitiendo crear flujos completos mediante instrucciones en lenguaje natural.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          No especificar el disparador, la fuente de datos o el destino, lo que genera un flujo incompleto o ambiguo.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 10 · Diagnóstico de error</h4>
+      <span class="dif-badge dif-intermedia">Intermedia</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Diagnóstico de error</p>
+    <p><strong>Enunciado:</strong> Un agente clasificador guarda solicitudes en Google Sheets, pero nunca envía la alerta por Gmail aunque la clasificación sea "caliente". El nodo If/Switch evalúa el campo clasificación y espera exactamente "caliente". El agente devuelve "Clasificación: CALIENTE". ¿Cuál es la causa probable y cómo se corrige?</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Observar que el If/Switch espera el valor exacto "caliente" en minúsculas.</li>
+          <li>Notar que el agente devuelve "CALIENTE" en mayúsculas y con texto adicional.</li>
+          <li>Concluir que la comparación no coincide y por eso la rama verdadera no se activa.</li>
+          <li>Corregir el System Prompt para que el agente devuelva un formato estructurado, por ejemplo JSON, con el campo clasificación en el valor exacto "caliente".</li>
+          <li>Ajustar el nodo If/Switch para que evalúe ese campo específico del JSON.</li>
+          <li>Probar nuevamente con un caso que deba ser caliente.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          Los nodos posteriores necesitan datos en formatos claros y consistentes; si el valor no coincide, la lógica condicional falla.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          No definir un formato de salida estructurado y depender de texto libre.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 11 · Completar tabla comparativa</h4>
+      <span class="dif-badge dif-intermedia">Intermedia</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Completar tabla</p>
+    <p><strong>Enunciado:</strong> Completa la tabla comparativa indicando "Sí" o "No" según corresponda.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Característica</th>
+            <th>Chatbot tradicional</th>
+            <th>Automatización tradicional</th>
+            <th>Agente de IA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Toma de decisiones</strong></td><td>¿?</td><td>¿?</td><td>¿?</td></tr>
+          <tr><td><strong>Flexibilidad</strong></td><td>¿?</td><td>¿?</td><td>¿?</td></tr>
+          <tr><td><strong>Uso de herramientas</strong></td><td>¿?</td><td>¿?</td><td>¿?</td></tr>
+          <tr><td><strong>Razonamiento por LLM</strong></td><td>¿?</td><td>¿?</td><td>¿?</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Recordar que el chatbot tradicional no decide y tiene flexibilidad nula.</li>
+          <li>Recordar que la automatización tradicional tampoco decide y tiene flexibilidad nula.</li>
+          <li>Recordar que el agente de IA sí decide y tiene flexibilidad alta.</li>
+          <li>Sobre uso de herramientas: chatbot no usa herramientas externas; automatización ejecuta acciones prefijadas; agente selecciona dinámicamente qué herramienta usar.</li>
+          <li>Sobre razonamiento por LLM: solo el agente lo posee.</li>
+        </ol>
+        <h4 style="margin-top:12px">Resultado</h4>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Característica</th>
+                <th>Chatbot tradicional</th>
+                <th>Automatización tradicional</th>
+                <th>Agente de IA</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Toma de decisiones</strong></td><td>No</td><td>No</td><td><strong>Sí</strong></td></tr>
+              <tr><td><strong>Flexibilidad</strong></td><td>Nula</td><td>Nula</td><td><strong>Alta</strong></td></tr>
+              <tr><td><strong>Uso de herramientas</strong></td><td>No</td><td>Acciones prefijadas</td><td><strong>Selección dinámica</strong></td></tr>
+              <tr><td><strong>Razonamiento por LLM</strong></td><td>No</td><td>No</td><td><strong>Sí</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          La tabla del tutorial muestra que solo el agente incorpora razonamiento y decisión adaptativa.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Atribuir razonamiento o toma de decisiones a la automatización tradicional.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- ===== NIVEL AVANZADO ===== -->
+  <h3>Nivel Avanzado</h3>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 12 · Clasificación de leads</h4>
+      <span class="dif-badge dif-avanzada">Avanzada</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Clasificación de leads</p>
+    <p><strong>Enunciado:</strong> Clasifica los siguientes prospectos como <em>caliente</em>, <em>tibio</em> o <em>frío</em> según los criterios del tutorial.</p>
+
+    <div class="grid-2">
+      <div class="pair-box">
+        <span class="pair-title">Prospecto A</span>
+        Proyecto de automatización con IA, alto ajuste, presupuesto $1,200 USD, plazo definido de 3 semanas.
+      </div>
+      <div class="pair-box">
+        <span class="pair-title">Prospecto B</span>
+        Proyecto no realizable con IA, presupuesto $300 USD, plazo indefinido.
+      </div>
+      <div class="pair-box">
+        <span class="pair-title">Prospecto C</span>
+        Proyecto con ajuste aceptable, presupuesto $900 USD, plazo poco claro.
+      </div>
+    </div>
+
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Recordar los criterios: <strong>caliente</strong> = alto fit, presupuesto &gt;= $1,000 USD y plazo definido.</li>
+          <li>Evaluar Prospecto A: alto ajuste, $1,200 USD y plazo definido. Cumple todo: <strong>caliente</strong>.</li>
+          <li>Recordar que <strong>frío</strong> = presupuesto &lt; $500 USD o proyecto no realizable.</li>
+          <li>Evaluar Prospecto B: $300 USD y proyecto no realizable. Cumple criterio de frío: <strong>frío</strong>.</li>
+          <li>Recordar que <strong>tibio</strong> = fit aceptable o presupuesto medio.</li>
+          <li>Evaluar Prospecto C: ajuste aceptable, $900 USD y plazo poco claro. No es caliente porque no alcanza los $1,000 ni tiene plazo definido; encaja como <strong>tibio</strong>.</li>
+          <li>Resultado final: <strong>A = caliente, B = frío, C = tibio</strong>.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          La clasificación combina ajuste, presupuesto y urgencia, no solo una variable aislada.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Clasificar solo por presupuesto e ignorar el ajuste del proyecto o la urgencia.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 13 · Checklist de validación en producción</h4>
+      <span class="dif-badge dif-avanzada">Avanzada</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Checklist de validación</p>
+    <p><strong>Enunciado:</strong> Antes de activar un agente en producción, elabora una checklist basada en el marco de 7 pasos del tutorial. Debe contener al menos una pregunta de validación por cada paso.</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ul class="checklist">
+          <li><strong>Paso 1:</strong> ¿El objetivo está claramente definido y acotado?</li>
+          <li><strong>Paso 2:</strong> ¿El disparador es reactivo y seguro?</li>
+          <li><strong>Paso 3:</strong> ¿Las instrucciones especifican el formato de salida deseado?</li>
+          <li><strong>Paso 4:</strong> ¿Todas las herramientas externas tienen sus credenciales o APIs conectadas?</li>
+          <li><strong>Paso 5:</strong> ¿Se seleccionó la memoria adecuada según la persistencia requerida?</li>
+          <li><strong>Paso 6:</strong> ¿La base de conocimientos cubre la información que el agente necesita?</li>
+          <li><strong>Paso 7:</strong> ¿Se realizaron pruebas con datos reales y casos de borde?</li>
+        </ul>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          El checklist asegura que no se omita ningún componente crítico antes del despliegue.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Saltar las pruebas con datos incompletos, malformados o casos límite.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 14 · Estrategia de memoria y RAG</h4>
+      <span class="dif-badge dif-avanzada">Avanzada</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Estrategia de memoria y RAG</p>
+    <p><strong>Enunciado:</strong> Un agente debe responder consultas sobre políticas internas extensas y, además, recordar los últimos mensajes de una conversación con el usuario. ¿Qué estrategia de memoria y conocimiento recomendarías? ¿Qué harías si la información fuera breve?</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li>Identificar que recordar los últimos mensajes corresponde a <strong>memoria simple</strong>, como Window Buffer Memory, que mantiene los últimos N mensajes.</li>
+          <li>Identificar que las políticas internas extensas superan el límite de un prompt tradicional.</li>
+          <li>Recomendar una <strong>base de datos vectorial o RAG</strong> para consultar grandes volúmenes de documentación interna.</li>
+          <li>Combinar ambas: memoria simple para el hilo conversacional y RAG para la base de conocimiento extensa.</li>
+          <li>Si la información fuera breve, recordar que basta con vincular un documento de Google Docs como base de conocimiento.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          La memoria mantiene contexto conversacional, mientras que RAG permite recuperar información precisa de documentación extensa sin sobrecargar el prompt.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Intentar meter toda la documentación interna dentro del prompt o usar RAG cuando la información es breve.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="exercise">
+    <div class="ex-head">
+      <h4>Ejercicio 15 · Análisis de errores y guardrails</h4>
+      <span class="dif-badge dif-avanzada">Avanzada</span>
+    </div>
+    <p class="ex-meta"><strong>Tipo:</strong> Análisis de errores y guardrails</p>
+    <p><strong>Enunciado:</strong> Un desarrollador despliega un agente autónomo sin supervisión, no define formato de salida estructurado, usa un modelo caro para clasificar spam simple y no prueba casos de borde. Identifica al menos cuatro errores según el tutorial y propone una corrección para cada uno.</p>
+    <div class="acc">
+      <div class="acc-head">Ver solución paso a paso</div>
+      <div class="acc-body"><div class="acc-inner">
+        <ol>
+          <li><strong>Error:</strong> desplegar un agente autónomo sin supervisión en un cliente. <strong>Corrección:</strong> preferir agentes reactivos, que se activan por eventos claros y son seguros y auditables.</li>
+          <li><strong>Error:</strong> no definir formato de salida estructurado. <strong>Corrección:</strong> indicar en el System Prompt un formato claro, como JSON, para que los nodos siguientes puedan procesar la información.</li>
+          <li><strong>Error:</strong> usar un modelo caro para una tarea simple de clasificación. <strong>Corrección:</strong> usar OpenAI o Google Gemini para extracción o clasificación básica, reservando modelos como Claude Sonnet para tareas críticas.</li>
+          <li><strong>Error:</strong> no realizar pruebas de estrés ni casos de borde. <strong>Corrección:</strong> probar con datos incompletos, malformados o contradictorios antes de producción.</li>
+          <li><strong>Conclusión:</strong> aplicar guardrails, elegir bien el modelo y validar el flujo reduce riesgos, costos y fallos operativos.</li>
+        </ol>
+        <div class="callout ex" style="margin-top:10px">
+          <span class="label">Por qué (Explicación causal)</span>
+          Los errores señalados coinciden con los "errores que nunca debes cometer": automatizar de golpe, desplegar autonomía sin supervisión, no probar, ignorar costo-beneficio y no estructurar la salida.
+        </div>
+        <div class="callout warn" style="margin-top:8px">
+          <span class="label">Error típico a evitar</span>
+          Ignorar la relación costo-beneficio del LLM y no establecer límites o guardrails antes del despliegue.
+        </div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="callout info" style="margin-top:22px">
+    <span class="label">✓ Fin de la sección de ejercicios</span>
+    Has completado los 15 ejercicios. Vuelve a los capítulos siempre que necesites repasar los conceptos, o dirígete a <strong>📚 Fuentes</strong> para consultar el recurso original.
+  </div>
+
+</section>
+
+<!-- ============ FUENTES ============ -->
+<section id="fuentes" class="section">
+  <div class="chapter-head">
+    <div class="chapter-icon">📚</div>
+    <div>
+      <span class="kicker">Referencias</span>
+      <h2>Fuentes del Tutorial</h2>
+    </div>
+  </div>
+
+  <p>A continuación se detallan los recursos de referencia utilizados para la elaboración de este tutorial, anclado en la fuente original:</p>
+
+  <div class="card">
+    <div class="card-title"><span class="dot red"></span>Video Fuente Original</div>
+    <p><strong>Nombre del Video:</strong> <code>¿NO SABES QUÉ ES UN AGENTE IA? TE ENSEÑO A CREARLO DESDE CERO</code></p>
+    <p><strong>URL del Video:</strong><br>
+      <a href="https://youtube.com/watch?v=B7RGbTHzMRo&is=gmvFYK8liMAAbX4O" target="_blank" rel="noopener" style="color:var(--accent);word-break:break-all;">https://youtube.com/watch?v=B7RGbTHzMRo&is=gmvFYK8liMAAbX4O</a>
+    </p>
+  </div>
+
+  <div class="callout info">
+    <span class="label">ℹ Nota</span>
+    Este tutorial conserva íntegramente el contenido del material original. No se ha introducido información externa ni se han inventado enlaces o datos.
+  </div>
+</section>
+
+<!-- ============ CRÉDITOS ============ -->
+<section id="creditos" class="section">
+  <div class="chapter-head">
+    <div class="chapter-icon">👤</div>
+    <div>
+      <span class="kicker">Cierre</span>
+      <h2>Créditos</h2>
+    </div>
+  </div>
+
+  <div class="credits-wrap">
+    <div class="hero-svg" id="credits-svg-container" style="margin-bottom:22px">
+      <!-- SVG se clona desde HOME vía JS -->
+    </div>
+
+    <div class="credit-title">Tutorial: Agentes de IA personalizados con n8n</div>
+    <div class="credit-name">Rubén Sbarsky</div>
+    <div class="credit-line">📅 Fecha: <strong style="color:var(--accent)">27/09/2026</strong></div>
+    <div class="credit-line">🕒 Hora: <strong style="color:var(--accent)">04:22:16</strong></div>
+    <div class="credit-line" style="margin-top:14px">📚 Tutorial solo con fines Educativos y Divulgación</div>
+
+    <div class="motto">Fiat iustitia, ruat caelum.</div>
+  </div>
+</section>
+
+<footer>
+  <p>📚 Tutorial solo con fines Educativos y Divulgación</p>
+  <p>👨‍💻 Créditos: Rubén Sbarsky</p>
+  <p>📅 FECHA: 27/09/2026 · Hora: 04:22:16</p>
+  <p class="motto-footer">Fiat iustitia, ruat caelum.</p>
+</footer>
+
+</main>
+
+<button id="top-btn" title="Volver arriba">↑</button>
+
+<script>
+(function(){
+  const sections = document.querySelectorAll('.section');
+  const navBtns = document.querySelectorAll('.nav-btn');
+  const progress = document.getElementById('progress');
+  const topBtn = document.getElementById('top-btn');
+
+  function showSection(id){
+    sections.forEach(s=>s.classList.remove('active'));
+    const target = document.getElementById(id);
+    if(!target) return;
+    target.classList.add('active');
+
+    navBtns.forEach(b=>{
+      b.classList.toggle('active', b.dataset.target === id);
+    });
+
+    // Si es créditos, clonar SVG de HOME y reiniciar animación
+    if(id === 'creditos'){
+      const sourceSvg = document.querySelector('#home .hero-svg svg');
+      const container = document.getElementById('credits-svg-container');
+      if(sourceSvg && container){
+        container.innerHTML = '';
+        const clone = sourceSvg.cloneNode(true);
+        container.appendChild(clone);
+        const svgEl = container.querySelector('svg');
+        if(svgEl && typeof svgEl.setCurrentTime === 'function'){
+          try{ svgEl.setCurrentTime(0); }catch(e){}
+        }
+      }
+    }
+
+    // Scroll al inicio suave
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  navBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>showSection(btn.dataset.target));
+  });
+
+  // Progress bar
+  function updateProgress(){
+    const h = document.documentElement;
+    const scrolled = h.scrollTop;
+    const total = h.scrollHeight - h.clientHeight;
+    const pct = total > 0 ? (scrolled / total) * 100 : 0;
+    progress.style.width = pct + '%';
+
+    if(scrolled > 400){
+      topBtn.style.display = 'flex';
+    } else {
+      topBtn.style.display = 'none';
+    }
+  }
+
+  window.addEventListener('scroll', updateProgress, {passive:true});
+  window.addEventListener('resize', updateProgress);
+
+  topBtn.addEventListener('click', ()=>{
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  // Acordeones
+  document.querySelectorAll('.acc-head').forEach(h=>{
+    h.addEventListener('click', ()=>{
+      h.parentElement.classList.toggle('open');
+    });
+  });
+
+  updateProgress();
+})();
+</script>
+</body>
+</html>
